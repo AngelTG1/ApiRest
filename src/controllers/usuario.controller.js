@@ -64,4 +64,25 @@ export const createUsuario = async (req, res) => {
   }
 };
 
+export const updateUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, apellido, correo, contrasenia, rol } = req.body;
 
+    const query =
+      "UPDATE usuarios SET nombre = IFNULL(?, nombre), apellido = IFNULL(?, apellido), correo = IFNULL(?, correo), contrasenia = IFNULL(?, contrasenia), rol = IFNULL(?, rol) WHERE id = ?";
+    const values = [nombre, apellido, correo, contrasenia, rol, id];
+
+    const [result] = await pool.query(query, values);
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: "Usuario not found" });
+
+    const [rows] = await pool.query("SELECT * FROM usuarios WHERE id = ?", [id]);
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
